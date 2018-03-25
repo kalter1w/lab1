@@ -1,0 +1,130 @@
+#include "stdafx.h"
+#include <iostream>
+#include <cstdio>
+#include <conio.h>
+#include <fstream>
+#include <cstring>
+#include <Windows.h>
+using namespace std;
+
+int emptyend;//переменная для вывода колличества пустых строк
+int amountend;//переменная для вывода колличества введенных строк
+int longstrend;//переменная для вывода длины самой большой строки
+
+char endsymb;//переменная для записи конечного специального символа
+char startsymb;//переменная для записи начального специального символа
+
+void startendsymb();//функция в которой вводятся начальный и конечный символы
+void createfile(int longstr, int amount, int empty, char outstr[200]);//функция в которой создается файл и производятся расчеты
+void savetofile(int longstr, int amount, int empty, char outstr[200]);//функция записывает результаты в конечный файл
+
+int main()
+{
+
+	int empty = 1;//инициализируем переменную колличества пустых строк
+	int amount = 0;//инициализируем переменную колличества введенных строк
+	int longstr = 0;//инициализируем переменную для вывода длины самой большой строки
+	char outstr[200] = "";//инициализируем строку
+
+	system("pause");
+	SetConsoleTitle(TEXT("IS-73. Glukhov Nikita Pavlovich. Lab 1 : Text file"));//заголовок окна
+
+	int key = 0;//переменная получающая значения с клавиатуры
+	do {
+		system("cls");//очищаем окно консоли
+		cout << "\tMenu:\n";
+		cout << "1 - input special symbols\n";//введите специальные символы
+		cout << "2 - add data to file\n";// введите строки в файл
+		cout << "3 - save to output file\n";//сохраните данные в конечный файл
+		cout << "Esc - exit\n";//ESC для выхода
+		key = _getch();//перехват нажатых клавиш
+		switch (key) {
+		case 49: {startendsymb(); break; }//вызов функции в которой вводятся начальный и конечный символы по нажатию 1
+		case 50: {createfile(empty, longstr, amount, outstr); break; }//вызов функции в которой создается файл и производятся расчеты по нажатию 2
+		case 51: {savetofile(empty, longstr, amount, outstr); break; }//вызов функции которая записывает результаты в конечный файл по нажатию 3
+		case 27: {cout << "Goodbye!\n"; exit(1); break; } //нажатие esc
+		default: {cout << "Ircorrect choise. Try next time!\n"; break; }
+		}
+	} while (key != 27);//цикл будет продолжаться пока не будет нажата клавиша ESC
+	system("pause");
+	return 0;
+}
+
+void startendsymb() {
+	system("cls");//очищаем консоль
+	cout << "Enter start special symbol" << endl;//вывод сообщения на экран
+	cin >> startsymb;//ввод первого спец символа
+	cout << "Enter end special symbol" << endl;//вывод сообщения на экран
+	cin >> endsymb;//ввод конечного спец символа
+	fflush(stdin);
+}
+
+void createfile(int longstr, int amount, int empty, char outstr[200])
+{
+	char str[200];//обьявляем строку 
+	char way;//переменная отвечающая за хранения символа разрывающим цикл
+	FILE *f1;//обьявляем файл
+	cout << "Enter name for file with string" << endl;//вывод сообщения
+	f1 = fopen("inputfile.txt", "w+");//открываем файл на чтение
+	system("cls");//очищаем окно консоли
+	cout << "Enter you data:" << endl;//вывод сообщения на экран
+	cout << "to continue press / " << endl;//вывод сообщения на экран
+	do
+	{
+
+		fflush(stdin);
+		gets_s(str, 200);//ввод строки 
+		int z = strlen(str) - 1;//определяем переменную которая считывает длину введенной строки
+		amount = amount + 1;//счетчик строк 
+		if (strlen(str) == 0)//определитель пустых строк
+		{
+			empty = empty + 1;
+			emptyend = empty;
+		}
+		if (strlen(str) > longstr)//определитель самой длинной стркои
+		{
+			longstr = strlen(str);
+			longstrend = longstr;
+		}
+		if (str[0] == startsymb && str[z] == endsymb)//определитель строки с спец символами
+		{
+			strcpy(outstr, str);//копируем одну строку в другую
+		}
+
+		fputs(str, f1);//записываем введенные строки в начальный файл
+		putc('\n', f1);//переход на след строку
+		way = _getch();//перехват нажатой клавиши
+		amountend = amount;//присваем одну переменную другой
+	} while (way != '/');//по нажатию клавиши / закончить ввод строк
+
+	fclose(f1);//закрываем файл
+	cout << "Your strings be saved to file" << endl;//вывод сообщения на экран
+}
+
+void savetofile(int longstr, int amount, int empty, char outstr[200])
+{
+	char amountfile[10];//обьявляем строку для записи колличества строк
+	char longstrfile[10];// обьявляем строку для записи длины самой длинной строки
+	char emptyfile[10];//обьявляем строку для записи колличества пустых строчек
+	sprintf(amountfile, "%d", amountend);//переводим int B char
+	sprintf(longstrfile, "%d", longstrend);//переводим int B char
+	sprintf(emptyfile, "%d", emptyend);//переводим int B char
+	system("pause");
+	FILE *f2;// инициализируем открытие 2 файла
+	f2 = fopen("outputfile.txt", "w");//присваеваем ему имя и режим открытия
+	fputs("Special symbol string: ", f2);// запись сообщения в файл
+	fputs(outstr, f2);// запись строки в файл
+	putc('\n', f2);//переход на след строку
+	fputs("Amount of strings: ",f2);// запись сообщения в файл
+	fputs(amountfile, f2);// запись строки в файл
+	putc('\n', f2);//переход на след строку
+	fputs("Length of the largest string: ", f2);// запись сообщения в файл
+	fputs(longstrfile, f2);// запись строки в файл
+	putc('\n', f2);//переход на след строку
+	fputs("Amount empty strings: ", f2);// запись сообщения в файл
+	fputs(emptyfile, f2);// запись строки в файл
+	putc('\n', f2);//переход на след строку
+	fclose(f2);
+}
+
+
